@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MdAddShoppingCart } from 'react-icons/md';
 
 import { ProductList } from './styles';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
 import { useCart } from '../../hooks/useCart';
-import { format } from 'util';
 
 interface Product {
   id: number;
@@ -26,17 +25,19 @@ const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
   const { addProduct, cart } = useCart();
 
-  // const cartItemsAmount = cart.reduce((sumAmount, product) => {
+  const cartItemsAmount = cart.reduce((sumAmount, product) => {
+    sumAmount = {...sumAmount, [product.id]: product.amount};
 
-  // }, {} as CartItemsAmount)
+    return sumAmount;
+  }, {} as CartItemsAmount)
 
   useEffect(() => {
     async function loadProducts() {
-      fetch('http://localhost:3333/products')
-        .then(response => response.json())
+      api.get('/products')
+        .then(response => response.data)
         .then((data: ProductFormatted[]) => {
           const formatedData = data.map((item: ProductFormatted) => {
-            item.priceFormatted = format(item.price)
+            item.priceFormatted = formatPrice(item.price)
 
             return item;
           })
@@ -66,7 +67,7 @@ const Home = (): JSX.Element => {
           >
             <div data-testid="cart-product-quantity">
               <MdAddShoppingCart size={16} color="#FFF" />
-              {/* {cartItemsAmount[product.id] || 0} */}
+              {cartItemsAmount[product.id] || 0}
             </div>
 
             <span>ADICIONAR AO CARRINHO</span>
